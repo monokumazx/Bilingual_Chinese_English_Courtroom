@@ -39,6 +39,59 @@
         .wiggle-animation {
             animation: wiggle 0.8s ease-in-out infinite;
         }
+
+        /* Ace Attorney "Objection!" Animation */
+        @keyframes objection-shock {
+            0% {
+                transform: scale(0.1) rotate(0deg);
+                opacity: 0;
+                filter: brightness(1) drop-shadow(0 0 0 rgba(255, 0, 0, 0));
+            }
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+                opacity: 1;
+                filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 0, 0, 0.7));
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+            }
+        }
+
+        .objection-animation {
+            animation: objection-shock 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; /* Custom cubic-bezier for a "shock" effect */
+            transform-origin: center;
+        }
+
+        .objection-text-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Ensures the image doesn't spill out */
+        }
+
+        .objection-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('image_6993e5.png'); /* The "Objection!" image */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5));
+        }
+
+        .objection-text-overlay {
+            position: relative; /* To keep text on top of the image */
+            z-index: 10; /* Ensures text is above the image */
+            color: transparent; /* Make original text transparent */
+            font-size: 0; /* Hide original text font size */
+        }
+
     </style>
 </head>
 <body class="bg-amber-50 text-amber-950">
@@ -252,9 +305,9 @@
             { "category": "法律原则", "chinese": "诚实信用原则", "pinyin": "Chéng shí xìn yòng yuán zé", "english": "Good Faith Principle", "desc_zh": "民事法律中的诚信义务。", "desc_en": "Obligation of good faith in civil law." },
             { "category": "法律原则", "chinese": "法律面前人人平等", "pinyin": "Fǎ lǜ miàn qián rén rén píng děng", "english": "Equality Before the Law", "desc_zh": "法律适用不因身份、地位差异而区别对待。", "desc_en": "Law applies equally to all, regardless of status or identity." },
             { "category": "法律原则", "chinese": "司法独立", "pinyin": "Sī fǎ dú lì", "english": "Judicial Independence", "desc_zh": "法官独立审判，不受行政干预。", "desc_en": "Judges adjudicate independently without external interference." },
-            { "category": "法律原则", "chinese": "疑罪从无", "pinyin": "Yí zuì cóng wú", "english": "In Dubio Pro Reo", "desc_zh": "证据不足时，应作有利被告的判决。", "desc_en": "When in doubt, rule in favor of the defendant." },
+            { "category": "法律原则", "chinese": "疑罪从无", "pinyin": "Yí zuì cóng wú", "english": "Reasonable Doubt (<span style=\"font-size: 0.8em;\">In Dubio Pro Reo)</span>", "desc_zh": "证据不足时，应作有利被告的判决。", "desc_en": "When in doubt, rule in favor of the defendant." },
             { "category": "法律原则", "chinese": "举证责任", "pinyin": "jǔ zhèng zé rèn", "english": "Burden of Proof", "desc_zh": "应提供证据证明事实者的责任", "desc_en": "Duty to prove one’s case" },
-            { "category": "法律原则", "chinese": "判决先例", "pinyin": "Pàn jué xiān lì", "english": "Precedent", "desc_zh": "以往法院判决对后续类似案件具有约束力的原则。", "desc_en": "A legal principle where past court decisions guide future similar cases." },
+            { "category": "法律原则", "chinese": "判决先例", "pinyin": "Pàn jué xiān lì", "english": "Precedent", "desc_zh": "之前法院判决对后续类似案件具有约束力的原则。", "desc_en": "A principle or rule established in a previous legal case that is either binding on or persuasive for a court when deciding subsequent cases with similar issues or facts." },
 
             // 警种 (Police Categories)
             { "category": "警种", "chinese": "警察", "pinyin": "jǐngchá", "english": "Police", "desc_zh": "广义指执行法律和维护秩序的人员。", "desc_en": "General term for personnel who enforce laws and maintain order." },
@@ -386,11 +439,26 @@
 
                 const frontFace = document.createElement('div');
                 frontFace.className = 'card-face absolute w-full h-full flex flex-col items-center justify-center bg-amber-100 shadow-md rounded-lg p-4 text-center border-2 border-amber-300';
-                frontFace.innerHTML = `
-                    <h2 class="text-2xl font-semibold text-amber-800">${item.chinese}</h2>
-                    ${item.pinyin ? `<p class="text-amber-600">${item.pinyin}</p>` : ''}
-                    <p class="mt-2 text-lg text-amber-700">${item.english}</p>
-                `;
+                
+                // Special handling for "Objection!", "Hold It!", and "Take That!" cards
+                if (item.chinese === "异议！" || item.chinese === "等等！" || item.chinese === "看招！") {
+                    frontFace.classList.add('objection-text-container');
+                    frontFace.innerHTML = `
+                        <div class="objection-image"></div>
+                        <h2 class="objection-text-overlay text-2xl font-semibold text-amber-800">${item.chinese}</h2>
+                        ${item.pinyin ? `<p class="objection-text-overlay text-amber-600">${item.pinyin}</p>` : ''}
+                        <p class="objection-text-overlay mt-2 text-lg text-amber-700">${item.english}</p>
+                    `;
+                    // Add the animation class dynamically or on hover/click if desired
+                    // For continuous effect, add it here. For one-time on load, keep as is.
+                    frontFace.classList.add('objection-animation');
+                } else {
+                    frontFace.innerHTML = `
+                        <h2 class="text-2xl font-semibold text-amber-800">${item.chinese}</h2>
+                        ${item.pinyin ? `<p class="text-amber-600">${item.pinyin}</p>` : ''}
+                        <p class="mt-2 text-lg text-amber-700">${item.english}</p>
+                    `;
+                }
                 
                 const backFace = document.createElement('div');
                 backFace.className = 'card-face card-face-back absolute w-full h-full bg-amber-900 text-white shadow-lg rounded-lg p-4 flex flex-col justify-center text-sm overflow-y-auto';
@@ -400,7 +468,15 @@
                     backContent += `<p class="mb-1"><strong class="font-semibold">中文:</strong> ${item.desc_zh}</p>`;
                 }
                 if(item.desc_en) {
-                    backContent += `<p><strong class="font-semibold">English:</strong> ${item.desc_en}</p>`;
+                    // For "疑罪从无" specifically, adjust the display of "In Dubio Pro Reo"
+                    if (item.chinese === "疑罪从无" && item.english.includes("In Dubio Pro Reo")) {
+                        const englishParts = item.english.split('(');
+                        const mainEnglish = englishParts[0];
+                        const latinPhrase = englishParts[1] ? `(<span style="font-size: 0.8em;">${englishParts[1]}</span>` : '';
+                        backContent += `<p><strong class="font-semibold">English:</strong> ${mainEnglish}${latinPhrase}</p>`;
+                    } else {
+                        backContent += `<p><strong class="font-semibold">English:</strong> ${item.desc_en}</p>`;
+                    }
                 }
                  if (!item.desc_zh && !item.desc_en) {
                     backContent += `<p>暂无详细描述。</p><p>No detailed description.</p>`;
