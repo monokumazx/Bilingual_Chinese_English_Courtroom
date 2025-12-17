@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双语法律与《逆转裁判》词汇表 | Bilingual Legal & Ace Attorney Glossary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Courtroom Theme: Dark Vanilla & Dark Brown */
+        body {
+            font-family: 'Noto Sans SC', 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+        .scene {
+            perspective: 1000px;
+        }
+        .card {
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .card-face-back {
+            transform: rotateY(180deg);
+        }
+        @keyframes wiggle {
+            0% { transform: rotate(0deg); }
+            15% { transform: rotate(5deg); }
+            30% { transform: rotate(-5deg); }
+            45% { transform: rotate(3deg); }
+            60% { transform: rotate(-3deg); }
+            75% { transform: rotate(1deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .wiggle-animation {
+            animation: wiggle 0.8s ease-in-out infinite;
+        }
+
+        /* Ace Attorney "Objection!" Animation */
+        @keyframes objection-shock {
+            0% {
+                transform: scale(0.1) rotate(0deg);
+                opacity: 0;
+                filter: brightness(1) drop-shadow(0 0 0 rgba(255, 0, 0, 0));
+            }
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+                opacity: 1;
+                filter: brightness(1.5) drop-shadow(0 0 15px rgba(255, 0, 0, 0.7));
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: brightness(1) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+            }
+        }
+
+        .objection-text-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Ensures the image doesn't spill out */
+        }
+
+        .objection-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('image_6993e5.png'); /* The "Objection!" image */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.5));
+        }
+
+        .objection-text-overlay {
+            position: relative; /* To keep text on top of the image */
+            z-index: 10; /* Ensures text is above the image */
+            color: transparent; /* Make original text transparent */
+            font-size: 0; /* Hide original text font size */
+        }
+
+        .audio-btn {
+            background: none;
+            border: none;
+            color: #3b82f6; /* Blue color for icon */
+            cursor: pointer;
+            font-size: 0.9rem; /* Slightly smaller for table cells */
+            margin-left: 0.25rem;
+            vertical-align: middle;
+            padding: 0; /* Remove padding */
+            line-height: 1; /* Adjust line height */
+        }
+        .audio-btn:hover {
+            color: #1d4ed8; /* Darker blue on hover */
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            text-align: center;
+            font-family: 'Noto Sans SC', sans-serif;
+            color: #333;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-amber-950">
+
+    <div id="app" class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-amber-800 mb-2">双语法律与《逆转裁判》词汇表</h1>
+            <p class="text-lg text-amber-700">Bilingual Legal & Ace Attorney Glossary</p>
+            <p class="mt-4 max-w-3xl mx-auto text-amber-700">
+                欢迎使用这个交互式词汇表。您可以通过下方的搜索框或分类按钮筛选词汇。点击任意卡片即可翻转查看该词的详细解释和对应翻译。这个工具旨在帮助语言学习者、法律专业学生以及《逆转裁判》的爱好者们。
+            </p>
+        </header>
+
+        <div class="sticky top-0 bg-amber-50/80 backdrop-blur-sm z-10 py-4 mb-8">
+            <div class="mb-4">
+                <input type="text" id="searchInput" placeholder="搜索中文、拼音或英文... Search Chinese, Pinyin, or English..." class="w-full p-3 border border-amber-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition bg-amber-100 text-amber-950">
+            </div>
+            <div id="categoryFilters" class="flex flex-wrap justify-center gap-2">
+            </div>
+        </div>
+
+        <main id="card-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        </main>
+        
+        <div id="noResults" class="hidden text-center py-16">
+            <p class="text-xl text-amber-700">找不到匹配的词汇。</p>
+            <p class="text-amber-600">No matching terms found.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variable to hold the current speech synthesis utterance
+        let currentUtterance = null;
+
+        // Function to play or stop audio
+        function playAudio(text, lang, event) {
+            // Stop event propagation to prevent card flipping when audio button is clicked
+            if (event) {
+                event.stopPropagation();
+            }
+
+            if ('speechSynthesis' in window) {
+                // If an utterance is currently speaking, stop it
+                if (window.speechSynthesis.speaking && currentUtterance) {
+                    window.speechSynthesis.cancel();
+                    currentUtterance = null; // Clear the reference
+                    // If the same text is clicked again, it means stop
+                    if (currentUtterance && currentUtterance.text === text) {
+                        return;
+                    }
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (lang === 'zh') {
+                    utterance.lang = 'zh-CN';
+                } else if (lang === 'en') {
+                    utterance.lang = 'en-US';
+                }
+                window.speechSynthesis.speak(utterance);
+                currentUtterance = utterance; // Store the current utterance
+
+                // Clear currentUtterance when speaking ends
+                utterance.onend = () => {
+                    currentUtterance = null;
+                };
+            } else {
+                // Using a custom message box instead of alert()
+                const messageBox = document.createElement('div');
+                messageBox.className = 'message-box';
+                messageBox.innerHTML = `
+                    <p>Text-to-speech not supported in this browser.</p>
+                    <p class="text-sm text-gray-500 mt-2">You would need to integrate a TTS API or provide audio files.</p>
+                    <button onclick="this.parentNode.remove()" style="margin-top: 15px; padding: 8px 15px; background-color: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">OK</button>
+                `;
+                document.body.appendChild(messageBox);
+            }
+        }
+        window.playAudio = playAudio; // Make the function globally accessible
+
+        // Helper function to escape text for HTML attribute
+        const escapeHtmlAttribute = (text) => {
+            if (!text) return '';
+            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        };
+
+        // Consolidated and updated terminology data
+        const terminologyData = [
+            // 法庭角色 (Courtroom Roles) - Prioritized
+            { "category": "法庭角色", "chinese": "法官", "pinyin": "Fǎ guān", "english": "Judge", "desc_zh": "负责主持庭审并作出裁决的法律人员", "desc_en": "Legal professional who presides over trials and makes judgments" },
+            { "category": "法庭角色", "chinese": "审判长", "pinyin": "Shěn pàn zhǎng", "english": "Presiding Judge", "desc_zh": "主持案件审理的法官", "desc_en": "Judge leading the trial proceedings" },
+            { "category": "法庭角色", "chinese": "律师", "pinyin": "Lǜ shī", "english": "Lawyer/Attorney", "desc_zh": "为当事人提供法律服务的专业人员", "desc_en": "Professional providing legal services to clients" },
+            { "category": "法庭角色", "chinese": "检察官", "pinyin": "Jiǎn chá guān", "english": "Prosecutor", "desc_zh": "代表国家提出指控", "desc_en": "Legal representative who prosecutes" },
+            { "category": "法庭角色", "chinese": "控方律师", "pinyin": "Kòng fāng lù shī", "english": "Prosecutor", "desc_zh": "代表国家指控被告的律师", "desc_en": "Lawyer representing the prosecution" },
+            { "category": "法庭角色", "chinese": "陪审团", "pinyin": "Péi shěn tuán", "english": "Jury", "desc_zh": "参与裁决案件的普通公民团体", "desc_en": "Group of citizens deciding the verdict" },
+            { "category": "法庭角色", "chinese": "法警", "pinyin": "fǎ jǐng", "english": "Bailiff", "desc_zh": "在法院中维护秩序、护送被告、执行法庭命令的执法人员。", "desc_en": "A law enforcement officer in the court who maintains order, escorts defendants, and enforces court orders." },
+            { "category": "法庭角色", "chinese": "被告", "pinyin": "Bèi gào", "english": "Defendant", "desc_zh": "被起诉或控告的一方", "desc_en": "Party being sued or charged" },
+            { "category": "法庭角色", "chinese": "原告", "pinyin": "Yuán gào", "english": "Plaintiff", "desc_zh": "提起诉讼的一方", "desc_en": "Party initiating a lawsuit" },
+            { "category": "法庭角色", "chinese": "辩护律师", "pinyin": "Biàn hù lù shī", "english": "Defense Lawyer", "desc_zh": "为被告进行辩护的律师", "desc_en": "Lawyer who defends the accused" },
+            { "category": "法庭角色", "chinese": "陪审员", "pinyin": "Péi shěn yuán", "english": "Juror", "desc_zh": "陪审团中的个体成员", "desc_en": "Member of a jury" },
+            { "category": "法庭角色", "chinese": "证人", "pinyin": "Zhèng rén", "english": "Witness", "desc_zh": "提供案件相关证言的人", "desc_en": "Person who testifies regarding the case" },
+            { "category": "法庭角色", "chinese": "法院书记员", "pinyin": "shū jì yuán", "english": "Court Clerk", "desc_zh": "协助记录庭审、管理文书的工作人员。", "desc_en": "Staff who assist in court recordkeeping and document management." },
+            { "category": "法庭角色", "chinese": "假释员", "pinyin": "jiǎ shì yuán", "english": "Parole Officer", "desc_zh": "监督假释状态下犯罪人员的培训和行为", "desc_en": "Supervisor of individuals released on parole" },
+            { "category": "法庭角色", "chinese": "缓刑员", "pinyin": "huǎn xíng yuán", "english": "Probation Officer", "desc_zh": "监督缓刑中犯罪人员的行为", "desc_en": "Officer supervising offenders under probation" },
+            { "category": "法庭角色", "chinese": "受害者权利倡建人", "pinyin": "shòu hài zhě quán lì chàng dào rén", "english": "Victim Advocate", "desc_zh": "为受害者提供法律信息和支持的专业人员", "desc_en": "Specialist who supports and informs victims" },
+            { "category": "法庭角色", "chinese": "发现者", "pinyin": "fā xiàn zhě", "english": "Discoverer (of crime scene)", "desc_zh": "最早发现犯罪环境的人", "desc_en": "Person who discovers the crime scene" },
+            { "category": "法庭角色", "chinese": "口译员", "pinyin": "kǒu yì yuán", "english": "Interpreter", "desc_zh": "提供审判过程中语言翻译服务的人员", "desc_en": "Person who interprets spoken language during proceedings" },
+            { "category": "法庭角色", "chinese": "犯罪环境调查员", "pinyin": "fàn zuì huán jìng diào chá yuán", "english": "Crime Scene Investigator", "desc_zh": "分析、采集、保存犯罪环境证据的人员", "desc_en": "Person responsible for collecting and analyzing evidence from the crime scene" },
+            { "category": "法庭角色", "chinese": "法庭速记员", "pinyin": "fǎ tíng sù jì yuán", "english": "Court Reporter/Stenographer", "desc_zh": "记录庭审过程的专业人员。", "desc_en": "A professional who records court proceedings." },
+            { "category": "法庭角色", "chinese": "法庭安保", "pinyin": "fǎ tíng ān bǎo", "english": "Court Security/Marshal", "desc_zh": "负责法庭安全和秩序的执法人员。", "desc_en": "Law enforcement personnel responsible for court safety and order." },
+            { "category": "法庭角色", "chinese": "客户", "pinyin": "Kè hù", "english": "Client", "desc_zh": "律师所代理的当事人", "desc_en": "Person represented by a lawyer" },
+            { "category": "法庭角色", "chinese": "辩护人", "pinyin": "Biàn hù rén", "english": "Defender", "desc_zh": "为被告提供辩护的人", "desc_en": "Person defending the accused" },
+
+            // 法律与侦查 (Law & Investigation)
+            { "category": "法律与侦查", "chinese": "秩序", "pinyin": "zhì xù", "english": "Order" },
+            { "category": "法律与侦查", "chinese": "法律", "pinyin": "fǎ lǜ", "english": "Law" },
+            { "category": "法律与侦查", "chinese": "正义", "pinyin": "zhèng yì", "english": "Justice" },
+
+            // 案件相关 (Case-Related)
+            { "category": "案件相关", "chinese": "侦探", "pinyin": "Zhēn tàn", "english": "Detective", "desc_zh": "侦查案件的人", "desc_en": "A person who investigates cases" },
+            { "category": "案件相关", "chinese": "破案", "pinyin": "Pò àn", "english": "Solve a case", "desc_zh": "侦破案件", "desc_en": "To solve or crack a case" },
+            { "category": "案件相关", "chinese": "调查员", "pinyin": "Diào chá yuán", "english": "Investigator", "desc_zh": "调查案件的人", "desc_en": "A person who investigates" },
+            { "category": "案件相关", "chinese": "探员", "pinyin": "tàn yuán", "english": "Agent", "desc_zh": "特工、侦查人员", "desc_en": "Agent or operative" },
+            { "category": "案件相关", "chinese": "取证", "pinyin": "Qǔ zhèng", "english": "Gather evidence", "desc_zh": "收集证据", "desc_en": "Collecting evidence" },
+            { "category": "案件相关", "chinese": "搜查", "pinyin": "Sōu chá", "english": "Search", "desc_zh": "搜索现场或物品", "desc_en": "Search" },
+            { "category": "案件相关", "chinese": "隐蔽", "pinyin": "Yǐn bì", "english": "Undercover", "desc_zh": "隐藏身份执行任务", "desc_en": "Covert operations" },
+            { "category": "案件相关", "chinese": "鉴定", "pinyin": "Jiàn dìng", "english": "Authenticate/verification", "desc_zh": "对证据或物品进行鉴定", "desc_en": "Verification or authentication of evidence or items" },
+            { "category": "案件相关", "chinese": "刑侦", "pinyin": "Xíng zhēn", "english": "Criminal investigation", "desc_zh": "针对刑事案件的侦查", "desc_en": "Investigation focused on criminal cases" },
+            { "category": "案件相关", "chinese": "走私", "pinyin": "Zǒu sī", "english": "Smuggling", "desc_zh": "非法运输货物", "desc_en": "Illegal transportation of goods" },
+            { "category": "案件相关", "chinese": "嫌疑人", "pinyin": "Xián yí rén", "english": "Suspect", "desc_zh": "被怀疑犯罪的人", "desc_en": "Person suspected of a crime" },
+            { "category": "案件相关", "chinese": "案卷", "pinyin": "Àn juàn", "english": "Case file", "desc_zh": "案件材料和文件", "desc_en": "Collection of case documents" },
+            { "category": "案件相关", "chinese": "侦查", "pinyin": "Zhēn chá", "english": "Inquiry/investigation", "desc_zh": "侦查案件，收集线索", "desc_en": "Investigation and evidence gathering" },
+            { "category": "案件相关", "chinese": "反间谍", "pinyin": "Fǎn jiàn dié", "english": "Counter-espionage", "desc_zh": "防范间谍活动", "desc_en": "Activities to prevent spying" },
+            { "category": "案件相关", "chinese": "逃犯", "pinyin": "Táo fàn", "english": "Fugitive", "desc_zh": "逃跑的犯罪嫌疑人", "desc_en": "Person who flees to avoid capture" },
+            { "category": "案件相关", "chinese": "警察局", "pinyin": "Jǐng chá jú", "english": "Police station", "desc_zh": "警察办公的场所", "desc_en": "Place where police operate" },
+            { "category": "案件相关", "chinese": "调查报告", "pinyin": "Diào chá bào gào", "english": "Investigation report", "desc_zh": "调查后形成的报告", "desc_en": "Report formed after investigation" },
+            { "category": "案件相关", "chinese": "侦讯", "pinyin": "Zhēn xùn", "english": "Interrogation", "desc_zh": "对嫌疑人或证人的讯问", "desc_en": "Questioning suspects or witnesses" },
+            { "category": "案件相关", "chinese": "铁证", "pinyin": "Tiě zhèng", "english": "Ironclad evidence", "desc_zh": "无法反驳的确凿证据", "desc_en": "Conclusive evidence" },
+            { "category": "案件相关", "chinese": "证实", "pinyin": "Zhèng shí", "english": "Confirm/confirmatory", "desc_zh": "确认事实", "desc_en": "Confirming facts" },
+            { "category": "案件相关", "chinese": "动机", "pinyin": "Dòng jī", "english": "Motive", "desc_zh": "犯罪的动因或理由", "desc_en": "Reason behind committing a crime" },
+            { "category": "案件相关", "chinese": "涉案", "pinyin": "Shè àn", "english": "Involvement in the case", "desc_zh": "涉及案件", "desc_en": "Involvement in a case" },
+            { "category": "案件相关", "chinese": "不在场证明", "pinyin": "Bù zài chǎng zhèng míng", "english": "Alibi", "desc_zh": "证明犯罪时不在现场", "desc_en": "Proof of not being present at crime scene" },
+            { "category": "案件相关", "chinese": "推翻", "pinyin": "tuī fān", "english": "Overturn", "desc_zh": "使判决或证据无效", "desc_en": "To overturn a verdict or evidence" },
+            { "category": "案件相关", "chinese": "破绽", "pinyin": "pò zhàn", "english": "Flaw; loophole", "desc_zh": "证词或论据漏洞", "desc_en": "Loophole or inconsistency in evidence" },
+            { "category": "案件相关", "chinese": "提告", "pinyin": "tí gào", "english": "File a lawsuit", "desc_zh": "向法院提起诉讼", "desc_en": "Initiate legal proceedings" },
+            { "category": "案件相关", "chinese": "冤狱", "pinyin": "yuān yù", "english": "Wrongful Conviction", "desc_zh": "错误判刑", "desc_en": "Conviction of an innocent person" },
+            { "category": "案件相关", "chinese": "凶宅", "pinyin": "xiōng zhái", "english": "House with Criminal History", "desc_zh": "有犯罪历史的房屋", "desc_en": "House with a history of crime" },
+            { "category": "案件相关", "chinese": "卧底", "pinyin": "wò dǐ", "english": "Undercover Agent", "desc_zh": "潜伏卧底", "desc_en": "Covert operative" },
+            { "category": "案件相关", "chinese": "线人", "pinyin": "xiàn rén", "english": "(Police) Informant", "desc_zh": "提供线索的人", "desc_en": "Informant who provides information" },
+            { "category": "案件相关", "chinese": "当面指证", "pinyin": "dāng miàn zhǐ zhèng", "english": "Identify in person / Face-to-face accusation", "desc_zh": "当面指认犯罪嫌疑人", "desc_en": "Face-to-face identification" },
+            { "category": "案件相关", "chinese": "申诉", "pinyin": "shēn sù", "english": "Appeal / File a Complaint", "desc_zh": "对判决不服提出复审", "desc_en": "Request for review or complaint" },
+            { "category": "案件相关", "chinese": "现场重建 / 案件还原", "pinyin": "xiàn chǎng chóng jiàn / àn jiàn huán yuán", "english": "Crime Scene Reconstruction", "desc_zh": "重建案发现场", "desc_en": "Reconstruct crime scene" },
+            { "category": "案件相关", "chinese": "判例法", "pinyin": "Pàn lì fǎ", "english": "Case Law", "desc_zh": "法院判决形成的法律原则", "desc_en": "Legal principles from previous cases" },
+            { "category": "案件相关", "chinese": "成文法", "pinyin": "Chéng wén fǎ", "english": "Statutory Law", "desc_zh": "成文化的法律", "desc_en": "Written law" },
+            { "category": "案件相关", "chinese": "管辖权", "pinyin": "Guān xiá quán", "english": "Jurisdiction", "desc_zh": "法院或机关的管辖范围", "desc_en": "Authority of a court or agency" },
+            { "category": "案件相关", "chinese": "司法管辖权", "pinyin": "Sī fǎ guān xiá quán", "english": "Judicial Jurisdiction", "desc_zh": "法院审判案件的权力", "desc_en": "Court’s authority over a case" },
+            { "category": "案件相关", "chinese": "痕迹检验", "pinyin": "Hén jì jiǎn yàn", "english": "Trace Evidence Analysis", "desc_zh": "分析微小物证（如纤维、玻璃、土壤）。", "desc_en": "Analysis of physical traces in crime" },
+            { "category": "案件相关", "chinese": "法医学", "pinyin": "fǎ yī xué", "english": "Forensic Science", "desc_zh": "法律相关科学技术", "desc_en": "Application of science to law" },
+            { "category": "案件相关", "chinese": "抄没", "pinyin": "chāo mò", "english": "To search for and confiscate", "desc_zh": "搜查并没收物品", "desc_en": "Search and confiscation" },
+            { "category": "案件相关", "chinese": "认准", "pinyin": "rèn zhǔn", "english": "To firmly identify", "desc_zh": "确认嫌疑人或物品", "desc_en": "Firm identification" },
+            { "category": "案件相关", "chinese": "勒索", "pinyin": "lè suǒ", "english": "Blackmail", "desc_zh": "威胁索取钱财", "desc_en": "Extortion by threats" },
+            { "category": "案件相关", "chinese": "命案", "pinyin": "Mìng àn", "english": "Homicide Case", "desc_zh": "涉及致人死亡的刑事案件", "desc_en": "Criminal case involving death" },
+            { "category": "案件相关", "chinese": "悬案", "pinyin": "Xuán àn", "english": "Unsolved Case", "desc_zh": "尚未破案", "desc_en": "Case not solved" },
+            { "category": "案件相关", "chinese": "冤案", "pinyin": "Yuān àn", "english": "Wrongful Conviction", "desc_zh": "错误判决", "desc_en": "Conviction of an innocent person" },
+            { "category": "案件相关", "chinese": "旧案", "pinyin": "Jiù àn", "english": "Cold Case / Past Case", "desc_zh": "旧案件", "desc_en": "Previously closed or old case" },
+            { "category": "案件相关", "chinese": "现行犯", "pinyin": "Xiàn xíng fàn", "english": "Caught in the Act", "desc_zh": "当场抓获", "desc_en": "Person caught committing crime" },
+            { "category": "案件相关", "chinese": "主犯", "pinyin": "Zhǔ fàn", "english": "Principal Offender", "desc_zh": "犯罪主犯", "desc_en": "Main perpetrator" },
+            { "category": "案件相关", "chinese": "从犯", "pinyin": "Cóng fàn", "english": "Accomplice", "desc_zh": "协助犯罪", "desc_en": "Person assisting crime" },
+            { "category": "案件相关", "chinese": "累犯", "pinyin": "Lěi fàn", "english": "Repeat Offender", "desc_zh": "多次犯罪", "desc_en": "Person with prior convictions" },
+            { "category": "案件相关", "chinese": "首犯", "pinyin": "Shǒu fàn", "english": "First-Time Offender", "desc_zh": "初犯", "desc_en": "First-time offender" },
+            { "category": "案件相关", "chinese": "情节严重", "pinyin": "Qíng jié yán zhòng", "english": "Aggravating Circumstances", "desc_zh": "加重处罚的情节", "desc_en": "Factors increasing sentence severity" },
+            { "category": "案件相关", "chinese": "情节轻微", "pinyin": "Qíng jié qīng wēi", "english": "Mitigating Circumstances", "desc_zh": "减轻处罚的情节", "desc_en": "Factors reducing sentence severity" },
+            { "category": "案件相关", "chinese": "尸检", "pinyin": "Shī jiǎn", "english": "Autopsy", "desc_zh": "通过解剖确定死因。", "desc_en": "To determine the cause of death through dissection." },
+            { "category": "案件相关", "chinese": "案底", "pinyin": "Àn dǐ", "english": "Criminal Record", "desc_zh": "曾犯罪记录", "desc_en": "Record of prior criminal cases" },
+            { "category": "案件相关", "chinese": "案件", "pinyin": "Àn jiàn", "english": "Case / Legal Case", "desc_zh": "具体法律事件", "desc_en": "Specific legal dispute" },
+            { "category": "案件相关", "chinese": "环境", "pinyin": "xiàn chǎng", "english": "Crime Scene", "desc_zh": "犯罪发生的地点", "desc_en": "The location where a crime occurred" },
+            { "category": "案件相关", "chinese": "发现", "pinyin": "fā xiàn", "english": "Discovery", "desc_zh": "查观到有用情况或证据", "desc_en": "To observe or find useful information" },
+            { "category": "案件相关", "chinese": "线索", "pinyin": "xiànsuǒ", "english": "Clue", "desc_zh": "有助于案件侦破的初步信息。", "desc_en": "Preliminary information helpful in solving a case." },
+            { "category": "案件相关", "chinese": "排查", "pinyin": "pái chá", "english": "Screening / Inspection", "desc_zh": "系统地查找问题或风险，排除不相关情况。", "desc_en": "Systematic investigation to eliminate irrelevant factors or risks." },
+            { "category": "案件相关", "chinese": "真相", "pinyin": "Zhēn xiàng", "english": "Truth", "desc_zh": "案件所涉及的真实情况", "desc_en": "Factual reality related to a case" },
+
+            // 诉讼与法庭 (Court & Litigation)
+            { "category": "诉讼与法庭", "chinese": "诉讼", "pinyin": "Sù sòng", "english": "Litigation", "desc_zh": "在法庭中的诉讼过程", "desc_en": "The legal process of resolving disputes" },
+            { "category": "诉讼与法庭", "chinese": "诉讼时效", "pinyin": "Sùsòng shíxiào", "english": "Statute of limitations", "desc_zh": "指法律规定的当事人向法院提起诉讼的有效期限。逾期未起诉，将丧失胜诉权（但自然债务仍可能存在", "desc_en": "The time period within which a lawsuit must be filed. After expiration, the claimant may lose the right to legal remedy (though the debt itself may still exist)." },
+            { "category": "诉讼与法庭", "chinese": "仲裁", "pinyin": "Zhòng cái", "english": "Arbitration", "desc_zh": "争议仲裁解决", "desc_en": "Dispute resolution by arbitration" },
+            { "category": "诉讼与法庭", "chinese": "调解", "pinyin": "Tiáo jiě", "english": "Mediation", "desc_zh": "争议调解", "desc_en": "Dispute resolution by mediation" },
+            { "category": "诉讼与法庭", "chinese": "证据", "pinyin": "Zhèng jù", "english": "Evidence", "desc_zh": "用于证明案件事实的材料", "desc_en": "Materials that support facts in a case" },
+            { "category": "诉讼与法庭", "chinese": "量刑", "pinyin": "Liàng xíng", "english": "Sentencing", "desc_zh": "判决刑罚", "desc_en": "Judicial determination of punishment" },
+            { "category": "诉讼与法庭", "chinese": "和解", "pinyin": "Hé jiě", "english": "Settlement", "desc_zh": "争议双方达成的协议", "desc_en": "Agreement to resolve dispute" },
+            { "category": "诉讼与法庭", "chinese": "上诉", "pinyin": "Shàng sù", "english": "Appeal", "desc_zh": "对判决表示不满的上级经过", "desc_en": "Legal request for a higher court review" },
+            { "category": "诉讼与法庭", "chinese": "死刑", "pinyin": "Sǐ xíng", "english": "Capital Punishment", "desc_zh": "对严重犯罪判处死刑", "desc_en": "Death penalty" },
+            { "category": "诉讼与法庭", "chinese": "无期徒刑", "pinyin": "Wú qī tú xíng", "english": "Life Imprisonment", "desc_zh": "终身监禁", "desc_en": "Prison sentence without parole" },
+            { "category": "诉讼与法庭", "chinese": "法庭", "pinyin": "Fǎ tíng", "english": "Courtroom", "desc_zh": "诉讼或审判进行的地点", "desc_en": "Place where trials or hearings are held" },
+            { "category": "诉讼与法庭", "chinese": "肃静", "pinyin": "Sù jìng", "english": "Silence", "desc_zh": "要求法庭保持安静的指令", "desc_en": "Command to maintain silence in court" },
+            { "category": "诉讼与法庭", "chinese": "询问", "pinyin": "Xún wèn", "english": "Questioning", "desc_zh": "对证人或当事人的提问", "desc_en": "Interrogating a witness or party" },
+            { "category": "诉讼与法庭", "chinese": "庭审", "pinyin": "Tíng shěn", "english": "Court Hearing / Court Trial", "desc_zh": "在法庭上进行的案件审理过程", "desc_en": "Court proceedings in a legal case" },
+            { "category": "诉讼与法庭", "chinese": "审判", "pinyin": "Shěn pàn", "english": "Judgment / Trial", "desc_zh": "法院对案件的正式裁决过程", "desc_en": "The court's process of determining a verdict" },
+            { "category": "诉讼与法庭", "chinese": "声明", "pinyin": "Shēng míng", "english": "Statement", "desc_zh": "当事人或律师在庭上的陈述", "desc_en": "Verbal or written statement made in court" },
+            { "category": "诉讼与法庭", "chinese": "辩护", "pinyin": "Biàn hù", "english": "Defense", "desc_zh": "为被告所做的辩论或护理", "desc_en": "Argument in favor of the accused" },
+            { "category": "诉讼与法庭", "chinese": "控诉", "pinyin": "Kòng sù", "english": "Accuse / Prosecute", "desc_zh": "指控某人犯罪的行为", "desc_en": "Act of accusing someone of a crime" },
+            { "category": "诉讼与法庭", "chinese": "供词", "pinyin": "Gòng cí", "english": "Confession", "desc_zh": "犯罪嫌疑人对其行为的陈述", "desc_en": "Statement of admission by a suspect" },
+            { "category": "诉讼与法庭", "chinese": "否决", "pinyin": "Fǒu jué", "english": "Rejection / Veto", "desc_zh": "否定他人观点或请求", "desc_en": "To reject or veto a statement or request" },
+            { "category": "诉讼与法庭", "chinese": "加害者", "pinyin": "Jiā hài zhě", "english": "Perpetrator", "desc_zh": "实施伤害或犯罪的人", "desc_en": "Person who committed the harm or crime" },
+            { "category": "诉讼与法庭", "chinese": "宣誓", "pinyin": "Xuān shì", "english": "Oath", "desc_zh": "在法庭上宣誓说实话", "desc_en": "Swearing to tell the truth in court" },
+            { "category": "诉讼与法庭", "chinese": "证词 / 陈述", "pinyin": "zhèng cí / chén shù", "english": "Testimony", "desc_zh": "证人或嫌疑人的口头陈述", "desc_en": "Oral statement from a witness or suspect" },
+            { "category": "诉讼与法庭", "chinese": "物证", "pinyin": "wù zhèng", "english": "Physical Evidence", "desc_zh": "具有物理实体的证据", "desc_en": "Tangible, physical evidence" },
+            { "category": "诉讼与法庭", "chinese": "判决", "pinyin": "pàn jué", "english": "Verdict", "desc_zh": "法院对案件的最终决定", "desc_en": "The final judgment of a court" },
+            { "category": "诉讼与法庭", "chinese": "判决书", "pinyin": "pàn jué shū", "english": "Written Judgment", "desc_zh": "法院上署的判决文件", "desc_en": "Official written verdict document" },
+            { "category": "诉讼与法庭", "chinese": "保释", "pinyin": "bǎo shì", "english": "Bail", "desc_zh": "一个人在审判前被允许自由", "desc_en": "Release from custody before trial with conditions" },
+            { "category": "诉讼与法庭", "chinese": "罪名", "pinyin": "zuì míng", "english": "Charge", "desc_zh": "对犯罪行为的法定形式指控", "desc_en": "Legal accusation of a specific crime" },
+            { "category": "诉讼与法庭", "chinese": "异议", "pinyin": "yì yì", "english": "Objection", "desc_zh": "对审判结果或辩论表示反对", "desc_en": "Disagreement with an argument or ruling" },
+            { "category": "诉讼与法庭", "chinese": "有罪", "pinyin": "yǒu zuì", "english": "Guilty", "desc_zh": "证明已经犯罪或被判有罪", "desc_en": "Legally responsible for a crime" },
+            { "category": "诉讼与法庭", "chinese": "无罪", "pinyin": "wú zuì", "english": "Not Guilty", "desc_zh": "法院评定没有犯罪的结果", "desc_en": "Legal finding of innocence" },
+            { "category": "诉讼与法庭", "chinese": "裁决", "pinyin": "cái jué", "english": "Ruling", "desc_zh": "法院对一项经过的最终决定", "desc_en": "Court's official decision" },
+            { "category": "诉讼与法庭", "chinese": "审理", "pinyin": "shěn lǐ", "english": "Trial", "desc_zh": "对案件进行的法律审查过程", "desc_en": "Judicial examination of a case" },
+            { "category": "诉讼与法庭", "chinese": "传票", "pinyin": "chuán piào", "english": "Subpoena", "desc_zh": "要求人出庭或提供证据的命令", "desc_en": "Legal order to appear or present evidence" },
+            { "category": "诉讼与法庭", "chinese": "无罪释放", "pinyin": "wú zuì shì fàng", "english": "Acquittal", "desc_zh": "判定被告无罪并释放", "desc_en": "Judgement that the accused is not guilty" },
+            { "category": "诉讼与法庭", "chinese": "提审", "pinyin": "Tí shěn", "english": "Arraignment", "desc_zh": "法院首次传唤被告到庭，告知其罪名并要求其认罪。", "desc_en": "The first appearance of a defendant in court to hear the charges and enter a plea." },
+            { "category": "诉讼与法庭", "chinese": "认罪", "pinyin": "Rèn zuì", "english": "Plea (of guilty)", "desc_zh": "被告承认所控罪行。", "desc_en": "A defendant's formal statement of admitting guilt to a charge." },
+            { "category": "诉讼与法庭", "chinese": "不认罪", "pinyin": "Bù rèn zuì", "english": "Plea (of not guilty)", "desc_zh": "被告否认所控罪行。", "desc_en": "A defendant's formal statement of denying guilt to a charge." },
+            { "category": "诉讼与法庭", "chinese": "交叉询问", "pinyin": "Jiāo chā xún wèn", "english": "Cross-examination", "desc_zh": "律师对对方证人进行的提问。", "desc_en": "The questioning of a witness by the opposing attorney." },
+            { "category": "诉讼与法庭", "chinese": "主询问", "pinyin": "Zhǔ xún wèn", "english": "Direct examination", "desc_zh": "律师对己方证人进行的提问。", "desc_en": "The questioning of a witness by the attorney who called them to testify." },
+            { "category": "诉讼与法庭", "chinese": "作证", "pinyin": "Zuò zhèng", "english": "Testify", "desc_zh": "在法庭上提供证言。", "desc_en": "To give evidence as a witness in a court of law." },
+            { "category": "诉讼与法庭", "chinese": "伪证", "pinyin": "Wěi zhèng", "english": "Perjury", "desc_zh": "在宣誓后故意作假证。", "desc_en": "The offense of willfully telling an untruth in a court after taking an oath." },
+            { "category": "诉讼与法庭", "chinese": "藐视法庭", "pinyin": "Miǎo shì fǎ tíng", "english": "Contempt of Court", "desc_zh": "违反法庭秩序或不服从法官命令的行为。", "desc_en": "Disobeying or disrespecting the court's authority or orders." },
+            { "category": "诉讼与法庭", "chinese": "休庭", "pinyin": "Xiū tíng", "english": "Recess", "desc_zh": "法庭暂时停止审理。", "desc_en": "A temporary suspension of court proceedings." },
+            { "category": "诉讼与法庭", "chinese": "结案陈词", "pinyin": "Jié àn chén cí", "english": "Closing Argument", "desc_zh": "庭审结束时，律师向陪审团或法官总结案件和证据的陈述。", "desc_en": "The concluding statement of each party's counsel, summarizing the evidence and arguments." },
+            { "category": "诉讼与法庭", "chinese": "开庭陈述", "pinyin": "Kāi tíng chén shù", "english": "Opening Statement", "desc_zh": "庭审开始时，律师向陪审团或法官概述案件和预期证据的陈述。", "desc_en": "The initial statement made by attorneys to the jury or judge, outlining the case and expected evidence." },
+            { "category": "诉讼与法庭", "chinese": "证物", "pinyin": "Zhèng wù", "english": "Exhibit", "desc_zh": "在法庭上作为证据提交的物品。", "desc_en": "An item presented as evidence in court." },
+            { "category": "诉讼与法庭", "chinese": "定罪", "pinyin": "Dìng zuì", "english": "Conviction", "desc_zh": "法院判决被告有罪。", "desc_en": "A formal declaration by a court that someone is guilty of a criminal offense." },
+            { "category": "诉讼与法庭", "chinese": "判刑", "pinyin": "Pàn xíng", "english": "Sentence", "desc_zh": "法院对有罪被告判处的刑罚。", "desc_en": "The punishment assigned to a defendant found guilty by a court." },
+            { "category": "诉讼与法庭", "chinese": "证人席", "pinyin": "Zhèng rén xí", "english": "Witness Stand", "desc_zh": "证人在法庭上作证的位置。", "desc_en": "The place in a courtroom where a witness sits or stands to give testimony." },
+            { "category": "诉讼与法庭", "chinese": "被告席", "pinyin": "Bèi gào xí", "english": "Defendant's Stand", "desc_zh": "被告在法庭上就座的位置。", "desc_en": "The place in a courtroom where the defendant sits." },
+            { "category": "诉讼与法庭", "chinese": "控方席", "pinyin": "Kòng fāng xí", "english": "Prosecution's Bench", "desc_zh": "控方律师在法庭上的座位区。", "desc_en": "The seating area in a courtroom for the prosecution's legal team." },
+            { "category": "诉讼与法庭", "chinese": "辩方席", "pinyin": "Biàn fāng xí", "english": "Defense's Bench", "desc_zh": "辩护律师在法庭上的座位区。", "desc_en": "The seating area in a courtroom for the defense's legal team." },
+            { "category": "诉讼与法庭", "chinese": "审讯录像", "pinyin": "shěnxùn lùxiàng", "english": "Interrogation Recording", "desc_zh": "记录审讯过程的影音资料，用于法庭证据。", "desc_en": "Audio-visual recording of an interrogation used as court evidence." },
+            { "category": "诉讼与法庭", "chinese": "拒绝证言", "pinyin": "jùjué zhèngyán", "english": "Right to Remain Silent", "desc_zh": "被告拒绝作证或回答问题的权利。", "desc_en": "The defendant’s right to refuse to testify or answer questions." },
+            { "category": "诉讼与法庭", "chinese": "传讯", "pinyin": "chuán xùn", "english": "Summons / Subpoena", "desc_zh": "法院要求某人出庭或提供证据。", "desc_en": "A court order requiring someone to appear or provide evidence." },
+            { "category": "诉讼与法庭", "chinese": "品格证据", "pinyin": "pǐn gé zhèng jù", "english": "Character Evidence", "desc_zh": "用于证明一个人品质的证据", "desc_en": "Evidence about a person’s character" },
+            { "category": "诉讼与法庭", "chinese": "证警证据", "pinyin": "zhèng cí zhèng jù", "english": "Testimonial Evidence", "desc_zh": "证人陈述达到的证据", "desc_en": "Evidence presented via testimony" },
+            { "category": "诉讼与法庭", "chinese": "死因", "pinyin": "sǐ yīn", "english": "Cause of Death", "desc_zh": "导致一个人死亡的原因", "desc_en": "The reason or mechanism of death" },
+            { "category": "诉讼与法庭", "chinese": "辩论", "pinyin": "biàn lùn", "english": "Argument", "desc_zh": "在审判中所做出的辩拟或分析", "desc_en": "A presented reasoning or case in trial" },
+            { "category": "诉讼与法庭", "chinese": "纪录", "pinyin": "jì lù", "english": "Record", "desc_zh": "将事件纪录下来的文件或录音", "desc_en": "A documented or audio record" },
+            { "category": "诉讼与法庭", "chinese": "辩护词", "pinyin": "biàn hù cí", "english": "Defense Statement", "desc_zh": "辩护人所作的陈述", "desc_en": "Statement made in defense" },
+            { "category": "诉讼与法庭", "chinese": "举白旗", "pinyin": "jǔ bái qí", "english": "Surrender", "desc_zh": "表示退出或承认失败", "desc_en": "Indication of giving up or conceding" },
+            { "category": "诉讼与法庭", "chinese": "确凿证据", "pinyin": "què záo zhèng jù", "english": "Conclusive Evidence", "desc_zh": "无可反驳的确准证据", "desc_en": "Evidence that is indisputable" },
+            { "category": "诉讼与法庭", "chinese": "决定性证据", "pinyin": "jué dìng xìng zhèng jù", "english": "Decisive Evidence", "desc_zh": "赢失关键的重要证据", "desc_en": "Key evidence that determines outcome" },
+            { "category": "诉讼与法庭", "chinese": "记录", "pinyin": "jì lù", "english": "Record", "desc_zh": "事件过程的文件或数据纪录", "desc_en": "A documented record of events" },
+            { "category": "诉讼与法庭", "chinese": "法律程序", "pinyin": "fǎ lù chéng xù", "english": "Legal Procedure", "desc_zh": "法定的诉讼和判决步骤", "desc_en": "The steps and processes of law" },
+            { "category": "诉讼与法庭", "chinese": "法治", "pinyin": "fǎ zhì", "english": "Rule of Law", "desc_zh": "用法律统管社会的原则", "desc_en": "Principle of governing by law" },
+            { "category": "诉讼与法庭", "chinese": "法定程序", "pinyin": "fǎ dìng chéng xù", "english": "Due Process", "desc_zh": "法定要求的公正序程", "desc_en": "Legally required fair procedures" },
+            { "category": "诉讼与法庭", "chinese": "证言", "pinyin": "zhèng yán", "english": "Testimony", "desc_zh": "以口头或书面方式陈述事实", "desc_en": "Statement offered as evidence" },
+            { "category": "诉讼与法庭", "chinese": "判决书", "pinyin": "pàn jué shū", "english": "Court Order", "desc_zh": "法院出关的文件性命令", "desc_en": "Official document of legal ruling" },
+            { "category": "诉讼与法庭", "chinese": "公正", "pinyin": "gōng zhèng", "english": "Justice", "desc_zh": "公平、同等地选择和判决", "desc_en": "Fairness and impartiality in law" },
+            { "category": "诉讼与法庭", "chinese": "民事案件", "pinyin": "mín shì àn jiàn", "english": "Civil Case", "desc_zh": "个人或法人之间的法律纠纷", "desc_en": "Legal dispute between individuals or entities" },
+            { "category": "诉讼与法庭", "chinese": "造假", "pinyin": "fěi bàng", "english": "Defamation", "desc_zh": "通过捏造事实损害他人名誉的行为。例如，造假诽谤。", "desc_en": "The act of damaging someone's reputation by making false statements, such as malicious (injurious) falsehood." },
+            { "category": "诉讼与法庭", "chinese": "刑事和解", "pinyin": "Xíngshì héjiě", "english": "Criminal Reconciliation", "desc_zh": "在刑事诉讼中，被告人与被害人自愿达成和解协议，可能影响量刑（如从轻处罚）。", "desc_en": "Negotiation between prosecutor and defendant for a lighter sentence (plea bargaining)." },
+
+            
+            // 法律原则 (Legal Principles)
+            { "category": "法律原则", "chinese": "无罪推定", "pinyin": "Wú zuì tuī dìng", "english": "Presumption of Innocence", "desc_zh": "法律假定被告无罪", "desc_en": "Legal principle that defendant is innocent until proven guilty" },
+            { "category": "法律原则", "chinese": "违宪", "pinyin": "Wéi xiàn", "english": "Unconstitutional", "desc_zh": "违反宪法", "desc_en": "Contrary to constitution" },
+            { "category": "法律原则", "chinese": "司法审查", "pinyin": "Sī fǎ shěn chá", "english": "Judicial Review", "desc_zh": "法院对法律、政策的审查", "desc_en": "Court review of laws or policies" },
+            { "category": "法律原则", "chinese": "法无明文不为罪", "pinyin": "Fǎ wú míng wén bù wéi zuì", "english": "Nullum Crimen Sine Lege", "desc_zh": "法律未明确禁止的行为不构成犯罪（罪刑法定原则）。", "desc_en": "No crime without a law; a person cannot be punished for an act not clearly forbidden by law." },
+            { "category": "法律原则", "chinese": "一事不再理", "pinyin": "Yī shì bù zài lǐ", "english": "Double Jeopardy", "desc_zh": "同一罪行不得被重复审判（部分国家适用）。", "desc_en": "No person shall be tried twice for the same offense (applies in some legal systems)." },
+            { "category": "法律原则", "chinese": "正当程序", "pinyin": "Zhèng dàng chéng xù", "english": "Due Process", "desc_zh": "法律程序必须公平公正。", "desc_en": "Legal procedures must be fair and impartial." },
+            { "category": "法律原则", "chinese": "比例原则", "pinyin": "Bǐ lì yuán zé", "english": "Principle of Proportionality", "desc_zh": "刑罚或行政措施应与罪行/过错成比例。", "desc_en": "Punishment or measures must be proportionate to the offense." },
+            { "category": "法律原则", "chinese": "诚实信用原则", "pinyin": "Chéng shí xìn yòng yuán zé", "english": "Good Faith Principle", "desc_zh": "民事法律中的诚信义务。", "desc_en": "Obligation of good faith in civil law." },
+            { "category": "法律原则", "chinese": "法律面前人人平等", "pinyin": "Fǎ lǜ miàn qián rén rén píng děng", "english": "Equality Before the Law", "desc_zh": "法律适用不因身份、地位差异而区别对待。", "desc_en": "Law applies equally to all, regardless of status or identity." },
+            { "category": "法律原则", "chinese": "司法独立", "pinyin": "Sī fǎ dú lì", "english": "Judicial Independence", "desc_zh": "法官独立审判，不受行政干预。", "desc_en": "Judges adjudicate independently without external interference." },
+            { "category": "法律原则", "chinese": "疑罪从无", "pinyin": "Yí zuì cóng wú", "english": "Reasonable Doubt (<span style=\"font-size: 0.8em;\">In Dubio Pro Reo)</span>", "desc_zh": "证据不足时，应作有利被告的判决。", "desc_en": "When in doubt, rule in favor of the defendant." },
+            { "category": "法律原则", "chinese": "举证责任", "pinyin": "jǔ zhèng zé rèn", "english": "Burden of Proof", "desc_zh": "应提供证据证明事实者的责任", "desc_en": "Duty to prove one’s case" },
+            { "category": "法律原则", "chinese": "判决先例", "pinyin": "Pàn jué xiān lì", "english": "Precedent", "desc_zh": "之前法院判决对后续类似案件具有约束力的原则。", "desc_en": "A principle or rule established in a previous legal case that is either binding on or persuasive for a court when deciding subsequent cases with similar issues or facts." },
+
+            // 警种 (Police Categories)
+            { "category": "警种", "chinese": "警察", "pinyin": "jǐngchá", "english": "Police", "desc_zh": "广义指执行法律和维护秩序的人员。", "desc_en": "General term for personnel who enforce laws and maintain order." },
+            { "category": "警种", "chinese": "民警", "pinyin": "mínjǐng", "english": "Civil Police", "desc_zh": "负责日常社区治安的地方警察。", "desc_en": "Local police responsible for community safety." },
+            { "category": "警种", "chinese": "巡逻警察 / 巡警", "pinyin": "xúnjǐng", "english": "Patrol Police", "desc_zh": "街区与公共场所巡逻，预防犯罪。", "desc_en": "Patrol neighborhoods and public areas to prevent crime." },
+            { "category": "警种", "chinese": "交通警察 / 交警", "pinyin": "jiāojǐng", "english": "Traffic Police", "desc_zh": "负责交通管理与处理交通违法。", "desc_en": "Handle traffic control and violations." },
+            { "category": "警种", "chinese": "治安警察 / 治警", "pinyin": "zhìjǐng", "english": "Public Security Police", "desc_zh": "维护公共秩序，处理突发事件。", "desc_en": "Maintain public order and handle emergencies." },
+            { "category": "警种", "chinese": "刑警", "pinyin": "xíngjǐng", "english": "Criminal Police", "desc_zh": "专门调查刑事案件的警察。", "desc_en": "Specialize in criminal investigations." },
+            { "category": "警种", "chinese": "特种警察 / 特警", "pinyin": "tèjǐng", "english": "SWAT / Special Police", "desc_zh": "应对突发事件和高风险任务。", "desc_en": "Handle emergencies and high-risk operations." },
+            { "category": "警种", "chinese": "边防警察 / 边警", "pinyin": "biānfáng jǐngchá", "english": "Border Police", "desc_zh": "管理边境安全、防止非法入境。", "desc_en": "Guard borders and prevent illegal entry." },
+            { "category": "警种", "chinese": "海警", "pinyin": "hǎijǐng", "english": "Coast Guard", "desc_zh": "海上执法与救援。", "desc_en": "Maritime law enforcement and rescue." },
+            { "category": "警种", "chinese": "铁路警察 / 铁警", "pinyin": "tiějǐng", "english": "Railway Police", "desc_zh": "保障铁路系统安全的警察。", "desc_en": "Police responsible for railway system security." },
+            { "category": "警种", "chinese": "外事警察 / 外警", "pinyin": "wàishì jǐngchá", "english": "Foreign Affairs Police", "desc_zh": "处理涉外事务与外国人管理。", "desc_en": "Manage foreign-related affairs and foreigners." },
+            { "category": "警种", "chinese": "森林警察 / 森警", "pinyin": "sēnlín jǐngchá", "english": "Forest Police", "desc_zh": "负责森林资源保护与火灾预防。", "desc_en": "Protect forest resources and prevent wildfires." },
+            { "category": "警种", "chinese": "武警", "pinyin": "wǔjǐng", "english": "Armed Police", "desc_zh": "执行反恐、维稳、设施保护等任务。", "desc_en": "Handle anti-terrorism, stability maintenance, and facility protection." },
+            { "category": "警种", "chinese": "便衣警察", "pinyin": "biànyī jǐngchá", "english": "Undercover Police", "desc_zh": "隐藏身份秘密调查。", "desc_en": "Conduct covert investigations while disguised." },
+            { "category": "警种", "chinese": "警察局长 / 局长 / 警司", "pinyin": "júzhǎng / jǐngsī", "english": "Police Chief / Commissioner", "desc_zh": "负责警察局管理指挥工作。", "desc_en": "Head of a police department or precinct." },
+            { "category": "警种", "chinese": "女警", "pinyin": "nǚjǐng", "english": "Policewoman", "desc_zh": "女性警察的统称。", "desc_en": "General term for female police officers." },
+            { "category": "警种", "chinese": "员警", "pinyin": "yuánjǐng", "english": "Police Officer", "desc_zh": "台湾地区常用语，泛指各类警察。", "desc_en": "Common term in Taiwan for all types of police officers." },
+            { "category": "警种", "chinese": "网警", "pinyin": "wǎngjǐng", "english": "Cyber Police", "desc_zh": "负责网络安全与网络犯罪调查。", "desc_en": "Enforce cybersecurity and investigate cybercrimes." },
+            { "category": "警种", "chinese": "缉私警", "pinyin": "jī sī jǐng", "english": "Anti-smuggling Police", "desc_zh": "查处走私犯罪。", "desc_en": "Investigate and crack down on smuggling crimes." },
+            { "category": "警种", "chinese": "义务警员", "pinyin": "yì wù jǐng yuán", "english": "Volunteer Police", "desc_zh": "协助警察执法的志愿人员。", "desc_en": "Volunteers who assist police in law enforcement." },
+
+            // 执法用词 (Law Enforcement Terms)
+            { "category": "执法用词", "chinese": "逮捕", "pinyin": "Dài bǔ", "english": "Arrest", "desc_zh": "依法拘捕犯罪嫌疑人", "desc_en": "To lawfully detain a criminal suspect" },
+            { "category": "执法用词", "chinese": "拘留", "pinyin": "Jū liú", "english": "Detain", "desc_zh": "暂时限制人身自由", "desc_en": "To temporarily restrict someone's freedom" },
+            { "category": "执法用词", "chinese": "拘留所", "pinyin": "Jū liú suǒ", "english": "Detention center", "desc_zh": "拘留嫌疑人的场所", "desc_en": "Facility where suspects are detained" },
+            { "category": "执法用词", "chinese": "反驳", "pinyin": "Fǎn bó", "english": "Rebuttal", "desc_zh": "对对方意见或证据提出反对", "desc_en": "To counter another’s argument or evidence" },
+            { "category": "执法用词", "chinese": "驳倒", "pinyin": "Bó dǎo", "english": "Overrule", "desc_zh": "否定并驳回对方观点", "desc_en": "To refute or reject an argument" },
+            { "category": "执法用词", "chinese": "保护现场", "pinyin": "Bǎo hù xiàn chǎng", "english": "Preserve the scene", "desc_zh": "保持案发现场原状", "desc_en": "To preserve the original crime scene" },
+            { "category": "执法用词", "chinese": "警告", "pinyin": "Jǐng gào", "english": "Warning", "desc_zh": "提出正式劝诫或指令", "desc_en": "A formal caution or instruction" },
+            { "category": "执法用词", "chinese": "审讯", "pinyin": "Shěn xùn", "english": "Interrogation", "desc_zh": "审问嫌疑人或证人", "desc_en": "Questioning of suspects or witnesses" },
+            { "category": "执法用词", "chinese": "拘票", "pinyin": "Jū piào", "english": "Arrest warrant", "desc_zh": "逮捕嫌疑人的正式命令", "desc_en": "Formal order to arrest a suspect" },
+            { "category": "执法用词", "chinese": "扣押", "pinyin": "Kòu yā", "english": "Seize/Confiscate", "desc_zh": "依法收缴物品", "desc_en": "To legally confiscate items" },
+            { "category": "执法用词", "chinese": "搜查令", "pinyin": "Sōu zhā lìng", "english": "Search warrant", "desc_zh": "法院批准的搜查令", "desc_en": "Court-authorized document to perform a search" },
+            { "category": "执法用词", "chinese": "传唤", "pinyin": "Chuán huàn", "english": "Summon", "desc_zh": "要求某人出庭或接受调查", "desc_en": "Officially request someone's appearance" },
+            { "category": "执法用词", "chinese": "举报", "pinyin": "Jǔ bào", "english": "Report (to authorities)", "desc_zh": "向有关部门报告违法行为", "desc_en": "Reporting illegal activities to authorities" },
+            { "category": "执法用词", "chinese": "巡逻", "pinyin": "Xún luó", "english": "Patrol", "desc_zh": "定期在区域内巡视", "desc_en": "Regularly monitoring an area" },
+            { "category": "执法用词", "chinese": "窃听器", "pinyin": "Qiè tīng qì", "english": "Bug/listening device", "desc_zh": "用于秘密监听的装置", "desc_en": "Device used for covert listening" },
+            { "category": "执法用词", "chinese": "跟踪", "pinyin": "Gēn zōng", "english": "Surveillance / follow", "desc_zh": "秘密监视或尾随某人", "desc_en": "Covertly monitoring or following a person" },
+            { "category": "执法用词", "chinese": "警笛", "pinyin": "Jǐng dí", "english": "Siren", "desc_zh": "警车等发出的警示声音", "desc_en": "Alarm sound from police vehicles" },
+            { "category": "执法用词", "chinese": "勘察", "pinyin": "Kān chá", "english": "Investigation/Examination", "desc_zh": "对现场或地形等进行考察", "desc_en": "Site or field examination" },
+            { "category": "执法用词", "chinese": "缉毒", "pinyin": "Jī dú", "english": "Anti-drug", "desc_zh": "打击毒品犯罪的行动", "desc_en": "Actions against drug-related crimes" },
+            { "category": "执法用词", "chinese": "执法人员", "pinyin": "Zhí fǎ rén yuán", "english": "Law enforcement officer", "desc_zh": "执行法律、维持秩序的人员", "desc_en": "Individuals who enforce laws and maintain order" },
+            { "category": "执法用词", "chinese": "反贪污", "pinyin": "Fǎn tān wū", "english": "Anti-corruption", "desc_zh": "打击贪污行为", "desc_en": "Efforts to combat corruption" },
+            { "category": "执法用词", "chinese": "犯罪", "pinyin": "Fàn zuì", "english": "Crime", "desc_zh": "违反法律的行为", "desc_en": "Act in violation of the law" },
+            { "category": "执法用词", "chinese": "保密", "pinyin": "Bǎo mì", "english": "Confidentiality", "desc_zh": "保持信息不公开", "desc_en": "Keeping information secret" },
+            { "category": "执法用词", "chinese": "反恐", "pinyin": "Fǎn kǒng", "english": "Counter-terrorism", "desc_zh": "防范与打击恐怖活动", "desc_en": "Prevention and suppression of terrorism" },
+            { "category": "执法用词", "chinese": "反恐怖主义", "pinyin": "Fǎn kǒng bù zhǔ yì", "english": "Counter-terrorism", "desc_zh": "同上，用于正式语境", "desc_en": "Same as above, used formally" },
+            { "category": "执法用词", "chinese": "保安", "pinyin": "Bǎo ān", "english": "Bodyguard", "desc_zh": "负责保护人员安全的人", "desc_en": "Person who protects someone’s safety" },
+            { "category": "执法用词", "chinese": "警备", "pinyin": "Jǐng bèi", "english": "Security personnel", "desc_zh": "维持公共安全的力量或安排", "desc_en": "Arrangements or personnel for public security" },
+            { "category": "执法用词", "chinese": "警卫", "pinyin": "Jǐng wèi", "english": "Sentry / Guard", "desc_zh": "守卫要地或重要人员的人", "desc_en": "Guard assigned to protect key sites or people" },
+            { "category": "执法用词", "chinese": "保镖", "pinyin": "Bǎo biāo", "english": "Bodyguard", "desc_zh": "专为个人提供安保服务", "desc_en": "Private guard protecting an individual" },
+            { "category": "执法用词", "chinese": "调查", "pinyin": "Diào chá", "english": "Inquiry", "desc_zh": "查明事实或真相的过程", "desc_en": "Process of finding out the truth" },
+            { "category": "执法用词", "chinese": "拘留令", "pinyin": "Jū liú lìng", "english": "Detention order", "desc_zh": "拘留嫌疑人的正式文件", "desc_en": "Legal document ordering detention" },
+            { "category": "执法用词", "chinese": "调查员", "pinyin": "Diào chá yuán", "english": "Investigator", "desc_zh": "负责调查案件的人", "desc_en": "Person conducting investigations" },
+            { "category": "执法用词", "chinese": "武器", "pinyin": "Wǔ qì", "english": "Weapon", "desc_zh": "用于攻击或防御的工具", "desc_en": "Tool used in offense or defense" },
+            { "category": "执法用词", "chinese": "持枪", "pinyin": "Chí qiāng", "english": "Carry a firearm", "desc_zh": "携带枪支", "desc_en": "To carry a gun" },
+            { "category": "执法用词", "chinese": "刑事", "pinyin": "Xíng shì", "english": "Criminal", "desc_zh": "与犯罪有关的事项", "desc_en": "Related to criminal law or acts" },
+            { "category": "执法用词", "chinese": "民事", "pinyin": "Mín shì", "english": "Civil", "desc_zh": "涉及个人或法人权利义务的", "desc_en": "Relating to rights and duties of individuals or entities" },
+            { "category": "执法用词", "chinese": "警报", "pinyin": "Jǐng bào", "english": "Alarm", "desc_zh": "发出危险警示的信号", "desc_en": "Signal warning of danger" },
+            { "category": "执法用词", "chinese": "报案", "pinyin": "Bào àn", "english": "Report a case", "desc_zh": "向警方报告案件", "desc_en": "To report a case to the police" },
+            { "category": "执法用词", "chinese": "警情", "pinyin": "Jǐng qíng", "english": "Police situation", "desc_zh": "与警察有关的突发状况", "desc_en": "Emergency or situation handled by police" },
+            { "category": "执法用词", "chinese": "警员", "pinyin": "Jǐng yuán", "english": "Police officer", "desc_zh": "执行任务的警察人员", "desc_en": "Officer who carries out police duties" },
+            { "category": "执法用词", "chinese": "拘捕", "pinyin": "Jū bǔ", "english": "Arrest", "desc_zh": "同“逮捕”，正式用语", "desc_en": "Formal term for arrest" },
+            { "category": "执法用词", "chinese": "治安", "pinyin": "Zhì ān", "english": "Public security", "desc_zh": "社会的安全和秩序状态", "desc_en": "General state of social order" },
+            { "category": "执法用词", "chinese": "勘察", "pinyin": "Kān chá", "english": "To survey", "desc_zh": "查看并记录案件相关场所", "desc_en": "To examine and record crime-related scenes" },
+            { "category": "执法用词", "chinese": "保密审查", "pinyin": "Bǎo mì shěn chá", "english": "Classified Review", "desc_zh": "对涉密信息或材料进行保密性评估与审查", "desc_en": "Review of sensitive or classified information to ensure confidentiality" },
+            { "category": "执法用词", "chinese": "检举", "pinyin": "Jiǎn jǔ", "english": "Whistleblowing / Report (a crime)", "desc_zh": "向有关机关揭发违法行为", "desc_en": "Reporting illegal acts to relevant authorities" },
+            { "category": "执法用词", "chinese": "拦截", "pinyin": "lán jié", "english": "Intercept", "desc_zh": "阻止目标人员或物品继续移动或通信。", "desc_en": "To stop a person or item from moving or communicating further." },
+
+            // 法律角色 (Legal Roles - non-courtroom specific)
+            { "category": "法律角色", "chinese": "法律顾问", "pinyin": "fǎlǜ gùwèn", "english": "Legal Counsel", "desc_zh": "提供法律意见的专业人士，常见于企业或政府。", "desc_en": "A professional who provides legal advice, commonly found in corporations or government." },
+            { "category": "法律角色", "chinese": "仲裁员", "pinyin": "Zhòng cái yuán", "english": "Arbitrator", "desc_zh": "通过仲裁方式解决争议，不通过法院系统", "desc_en": "Resolves disputes through arbitration, outside the court system" },
+            { "category": "法律角色", "chinese": "调解员", "pinyin": "Tiáo jiě yuán", "english": "Mediator", "desc_zh": "协助双方当事人达成和解协议", "desc_en": "Assists parties in reaching a settlement agreement" },
+            
+            // 逆转裁判 (Ace Attorney) - Last and special
+            { "category": "逆转裁判", "chinese": "异议！", "pinyin": "Yì yì!", "english": "Objection!", "desc_zh": "游戏中律师打断证词或对方发言的标志性喊话。", "desc_en": "The iconic shout used by attorneys in the game to interrupt testimony or opposing statements." },
+            { "category": "逆转裁判", "chinese": "看招！", "pinyin": "Kàn zhāo!", "english": "Take That!", "desc_zh": "游戏中律师在指出证词矛盾时的喊话。", "desc_en": "The phrase used by attorneys in the game when presenting contradictory evidence." },
+            { "category": "逆转裁判", "chinese": "等等！", "pinyin": "Děng děng!", "english": "Hold It!", "desc_zh": "游戏中律师要求证人停止发言或思考时的喊话。", "desc_en": "The phrase used by attorneys in the game to stop a witness or to request time to think." },
+            { "category": "逆转裁判", "chinese": "逻辑", "pinyin": "Luó jí", "english": "Logic", "desc_zh": "游戏中推理和分析的基础。", "desc_en": "The foundation of reasoning and analysis in the game." },
+            { "category": "逆转裁判", "chinese": "推理", "pinyin": "Tuī lǐ", "english": "Deduction", "desc_zh": "游戏中根据已知线索得出结论的过程。", "desc_en": "The process of drawing conclusions from known clues in the game." },
+            { "category": "逆转裁判", "chinese": "交叉比对", "pinyin": "Jiāo chā bǐ duì", "english": "Cross-referencing", "desc_zh": "游戏中将不同证词或证据进行对比以发现矛盾。", "desc_en": "Comparing different testimonies or pieces of evidence to find contradictions in the game." }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardContainer = document.getElementById('card-container');
+            const searchInput = document.getElementById('searchInput');
+            const categoryFiltersContainer = document.getElementById('categoryFilters');
+            const noResults = document.getElementById('noResults');
+            let activeCategory = 'All';
+
+            // Define category translations
+            const categoryTranslations = {
+                "All": "All",
+                "法庭角色": "Courtroom Roles",
+                "法律与侦查": "Law & Investigation",
+                "案件相关": "Case-Related",
+                "诉讼与法庭": "Court & Litigation",
+                "法律原则": "Legal Principles",
+                "警种": "Police Categories",
+                "执法用词": "Law Enforcement Terms",
+                "法律角色": "Legal Roles", 
+                "逆转裁判": "Ace Attorney"
+            };
+
+            // Manually define the desired order of categories for the filter buttons
+            const orderedCategories = [
+                "All",
+                "法庭角色",
+                "法律与侦查",
+                "案件相关",
+                "诉讼与法庭",
+                "法律原则",
+                "警种",
+                "执法用词",
+                "法律角色", 
+                "逆转裁判"
+            ];
+
+            function createCard(item) {
+                const sceneEl = document.createElement('div');
+                sceneEl.className = 'scene h-48';
+                // Ensure item.chinese and item.english are strings before calling toLowerCase()
+                sceneEl.dataset.search = `${item.chinese || ''} ${item.pinyin ? item.pinyin.toLowerCase() : ''} ${(item.english || '').toLowerCase()}`;
+                sceneEl.dataset.category = item.category; // Ensure category is set for filtering
+
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card relative w-full h-full cursor-pointer';
+
+                const frontFace = document.createElement('div');
+                frontFace.className = 'card-face absolute w-full h-full flex flex-col items-center justify-center bg-amber-100 shadow-md rounded-lg p-4 text-center border-2 border-amber-300';
+                
+                // Special handling for "Objection!", "Hold It!", and "Take That!" cards
+                if (item.chinese === "异议！" || item.chinese === "等等！" || item.chinese === "看招！") {
+                    frontFace.classList.add('objection-text-container');
+                    frontFace.innerHTML = `
+                        <div class="objection-image"></div>
+                        <h2 class="objection-text-overlay text-2xl font-semibold text-amber-800">${item.chinese} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.chinese || '')}', 'zh', event)">🔊</button></h2>
+                        ${item.pinyin ? `<p class="objection-text-overlay text-amber-600">${item.pinyin}</p>` : ''}
+                        <p class="objection-text-overlay mt-2 text-lg text-amber-700">${item.english} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.english || '')}', 'en', event)">🔊</button></p>
+                    `;
+                    // Add the animation class dynamically or on hover/click if desired
+                    // For continuous effect, add it here. For one-time on load, keep as is.
+                    frontFace.classList.add('objection-animation');
+                } else {
+                    frontFace.innerHTML = `
+                        <h2 class="text-2xl font-semibold text-amber-800">${item.chinese} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.chinese || '')}', 'zh', event)">🔊</button></h2>
+                        ${item.pinyin ? `<p class="text-amber-600">${item.pinyin}</p>` : ''}
+                        <p class="mt-2 text-lg text-amber-700">${item.english} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.english || '')}', 'en', event)">🔊</button></p>
+                    `;
+                }
+                
+                const backFace = document.createElement('div');
+                backFace.className = 'card-face card-face-back absolute w-full h-full bg-amber-900 text-white shadow-lg rounded-lg p-4 flex flex-col justify-center text-sm overflow-y-auto';
+                
+                let backContent = `<h3 class="font-bold text-lg mb-2">${item.chinese || ''} / ${item.english || ''}</h3>`;
+                
+                if(item.desc_zh) {
+                    backContent += `<p class="mb-1"><strong class="font-semibold">中文:</strong> ${item.desc_zh} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.desc_zh || '')}', 'zh', event)">🔊</button></p>`;
+                }
+                if(item.desc_en) {
+                    // For "疑罪从无" specifically, adjust the display of "In Dubio Pro Reo"
+                    if (item.chinese === "疑罪从无" && item.english.includes("In Dubio Pro Reo")) {
+                        const englishParts = item.english.split('(<span'); // Split by the start of the span
+                        const mainEnglish = englishParts[0].trim();
+                        const latinPhraseSpan = englishParts[1] ? `(<span${englishParts[1]}` : ''; // Re-add the span tag
+                        backContent += `<p><strong class="font-semibold">English:</strong> ${mainEnglish} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(mainEnglish || '')}', 'en', event)">🔊</button>${latinPhraseSpan}</p>`;
+                    } else {
+                        backContent += `<p><strong class="font-semibold">English:</strong> ${item.desc_en} <button class="audio-btn" onclick="playAudio('${escapeHtmlAttribute(item.desc_en || '')}', 'en', event)">🔊</button></p>`;
+                    }
+                }
+                if (!item.desc_zh && !item.desc_en) {
+                    backContent += `<p>暂无详细描述。</p><p>No detailed description.</p>`;
+                }
+
+                backFace.innerHTML = backContent;
+
+                cardEl.appendChild(frontFace);
+                cardEl.appendChild(backFace);
+                sceneEl.appendChild(cardEl);
+                
+                cardEl.addEventListener('click', () => {
+                    cardEl.classList.toggle('is-flipped');
+                });
+
+                return sceneEl;
+            }
+
+            function renderCards() {
+                cardContainer.innerHTML = '';
+                terminologyData.forEach(item => {
+                    cardContainer.appendChild(createCard(item));
+                });
+            }
+
+            function renderCategoryFilters() {
+                categoryFiltersContainer.innerHTML = ''; // Clear existing buttons before rendering
+                orderedCategories.forEach(category => { // Use orderedCategories for rendering
+                    const button = document.createElement('button');
+                    // Use the categoryTranslations map to get both Chinese and English text
+                    button.innerHTML = `${category}<br><span class="text-xs opacity-80">${categoryTranslations[category] || ''}</span>`;
+                    button.dataset.category = category;
+                    button.className = 'px-4 py-2 text-sm font-medium rounded-full transition';
+                    
+                    if (category === 'All') {
+                        button.classList.add('bg-amber-900', 'text-white');
+                    } else if (category === '逆转裁判') {
+                        button.classList.add('bg-red-800', 'text-white', 'wiggle-animation'); // Deep red and wiggly
+                    } else if (category === '法庭角色') {
+                        button.classList.add('bg-orange-800', 'text-white', 'hover:bg-orange-900'); // Deep orange for courtroom roles
+                    } else if (category === '警种') {
+                        button.classList.add('bg-blue-800', 'text-white', 'hover:bg-blue-900'); // Deep blue for police categories
+                    }
+                    else {
+                        button.classList.add('bg-amber-200', 'text-amber-900', 'border', 'border-amber-500', 'hover:bg-amber-300');
+                    }
+                    
+                    button.addEventListener('click', () => {
+                        activeCategory = category;
+                        filterCards();
+                        updateActiveButton();
+                    });
+                    categoryFiltersContainer.appendChild(button);
+                });
+            }
+
+            function updateActiveButton() {
+                const buttons = categoryFiltersContainer.querySelectorAll('button');
+                buttons.forEach(button => {
+                    // Remove all specific color classes
+                    button.classList.remove('bg-amber-900', 'text-white', 'bg-red-800', 'wiggle-animation', 'bg-orange-800', 'bg-blue-800', 'hover:bg-orange-900', 'hover:bg-blue-900');
+                    // Add default inactive styles
+                    button.classList.add('bg-amber-200', 'text-amber-900', 'border', 'border-amber-500', 'hover:bg-amber-300');
+                    
+                    if(button.dataset.category === activeCategory) {
+                        // Apply active styles based on category
+                        if (button.dataset.category === '逆转裁判') {
+                            button.classList.add('bg-red-800', 'text-white', 'wiggle-animation');
+                        } else if (button.dataset.category === '法庭角色') {
+                            button.classList.add('bg-orange-800', 'text-white');
+                        } else if (button.dataset.category === '警种') {
+                            button.classList.add('bg-blue-800', 'text-white');
+                        }
+                        else {
+                            button.classList.add('bg-amber-900', 'text-white'); // Default active color
+                        }
+                        // Remove default inactive styles if active
+                        button.classList.remove('bg-amber-200', 'text-amber-900', 'border', 'border-amber-500', 'hover:bg-amber-300');
+                    }
+                });
+            }
+
+            function filterCards() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const cards = cardContainer.querySelectorAll('.scene');
+                let resultsFound = false;
+
+                cards.forEach(card => {
+                    const isCategoryMatch = activeCategory === 'All' || card.dataset.category === activeCategory;
+                    const isSearchMatch = card.dataset.search.toLowerCase().includes(searchTerm);
+
+                    if (isCategoryMatch && isSearchMatch) {
+                        card.classList.remove('hidden');
+                        resultsFound = true;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                
+                noResults.classList.toggle('hidden', resultsFound);
+            }
+            
+            searchInput.addEventListener('input', filterCards);
+            
+            renderCards();
+            renderCategoryFilters();
+        });
+    </script>
+<div class="text-center py-6 text-amber-900">
+            <p class="mb-2">🧋 我在这期间花了不少功夫收集并整理这些词汇。如果这个应用对你有帮助，欢迎请我喝杯奶茶～</p>
+            <p class="mb-2">I've spent a great deal of time finding and organizing this vocabulary... If you found this helpful, feel free to treat me to a milk tea!</p>
+            <p>💌 PayPal: monokumazx@gmail.com</p>
+        </div>
+    </body>
+</html>
